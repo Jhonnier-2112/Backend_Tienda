@@ -1,0 +1,33 @@
+# Go build output
+/bin/
+/pkg/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# IDE/editor directories
+.vscode/
+
+# Environment variables
+.env
+
+# Secrets / tokens
+token.json
+
+# Docker
+.Dockerfile.swp
+
+docker-compose.override.yml
+
+docker-compose.*.yml
+
+# Logs
+*.log
+
+# Generated docs
+/docs/
+
+# Uploads (if you don't want to track uploaded files)
+/uploads/
