@@ -526,7 +526,7 @@ definitions:
     - first_name
     - last_name
     type: object
-host: https://backend-tienda-wrgv.onrender.com
+host: backend-tienda-wrgv.onrender.com
 info:
   contact:
     email: support@example.com

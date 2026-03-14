@@ -23,7 +23,7 @@ import (
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT
 
-// @host https://backend-tienda-wrgv.onrender.com
+// @host backend-tienda-wrgv.onrender.com
 // @BasePath /api
 
 // @securityDefinitions.apikey BearerAuth
