@@ -35,8 +35,8 @@ COPY --from=builder /app/server .
 RUN mkdir -p /app/uploads
 
 # Railway usa puerto dinámico
-ENV PORT=8080
+ENV PORT=10000
 
-EXPOSE 8080
+EXPOSE 10000
 
 CMD ["./server"]

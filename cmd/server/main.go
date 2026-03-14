@@ -23,7 +23,7 @@ import (
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT
 
-// @host 127.0.0.1:60203
+// @host 127.0.0.1:10000
 // @BasePath /api
 
 // @securityDefinitions.apikey BearerAuth
