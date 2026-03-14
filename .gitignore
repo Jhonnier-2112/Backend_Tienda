@@ -11,7 +11,7 @@
 .vscode/
 
 # Environment variables
-.env
+
 
 # Secrets / tokens
 token.json
