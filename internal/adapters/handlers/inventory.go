@@ -178,6 +178,11 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	userID, _ := c.Get("userID")
 
 	fmt.Printf("Creating product with category ID: %d\n", categoryID) // Debug log
+	fmt.Printf("Received price: %v\n", price)                         // Debug log
+	fmt.Printf("Received cost price: %v\n", costPrice)                // Debug log
+	fmt.Printf("Received stock: %d\n", stock)                         // Debug log
+	fmt.Printf("Received min stock: %d\n", minStock)                  // Debug log
+
 	product, err := h.service.CreateProduct(userID.(uint), name, description, sku, price, costPrice, stock, minStock, uint(categoryID), file)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
