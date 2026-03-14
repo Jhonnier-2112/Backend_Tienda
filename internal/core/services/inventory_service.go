@@ -75,6 +75,7 @@ func (s *inventoryService) CreateProduct(
 	categoryID uint,
 	imageFile *multipart.FileHeader,
 ) (*domain.Product, error) {
+	fmt.Printf("Received CreateProduct request: name=%s, categoryID=%d\n", name, categoryID) // Debug log
 	if _, err := s.repo.GetCategoryByID(categoryID); err != nil {
 		return nil, errors.New("invalid category ID")
 	}

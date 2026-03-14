@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -176,6 +177,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 
+	fmt.Printf("Creating product with category ID: %d\n", categoryID) // Debug log
 	product, err := h.service.CreateProduct(userID.(uint), name, description, sku, price, costPrice, stock, minStock, uint(categoryID), file)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
