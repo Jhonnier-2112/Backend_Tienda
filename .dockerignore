@@ -1,0 +1,27 @@
+# Variables de entorno - no incluir en la imagen
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Archivos de pruebas y temporales
+*_test.go
+test_*.jpg
+test_*.png
+
+# Uploads de desarrollo local (se usa un volumen Docker en producción)
+uploads/
+
+# Binarios compilados localmente
+server
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

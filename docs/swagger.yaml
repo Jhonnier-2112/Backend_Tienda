@@ -1,0 +1,1548 @@
+basePath: /api
+definitions:
+  domain.AuditLog:
+    properties:
+      action:
+        description: e.g., "CREATE_PRODUCT", "UPDATE_PRICE", "ADJUST_STOCK"
+        type: string
+      created_at:
+        type: string
+      entity_id:
+        type: integer
+      entity_name:
+        description: e.g., "Product", "Inventory"
+        type: string
+      id:
+        type: integer
+      new_value:
+        type: string
+      old_value:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: integer
+    type: object
+  domain.Cart:
+    properties:
+      id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/domain.CartItem'
+        type: array
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.CartItem:
+    properties:
+      cart_id:
+        type: integer
+      id:
+        type: integer
+      product:
+        $ref: '#/definitions/domain.Product'
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  domain.Category:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      products:
+        description: Has Many relationship
+        items:
+          $ref: '#/definitions/domain.Product'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  domain.CustomerProfile:
+    properties:
+      cedula:
+        description: DNI/ID
+        type: string
+      created_at:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      phone:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.Discount:
+    properties:
+      active:
+        type: boolean
+      category_id:
+        description: nil = applies to product
+        type: integer
+      code:
+        description: Optional coupon code
+        type: string
+      created_at:
+        type: string
+      expires_at:
+        description: nil = no expiration
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      product_id:
+        description: nil = applies to category
+        type: integer
+      starts_at:
+        type: string
+      type:
+        $ref: '#/definitions/domain.DiscountType'
+      updated_at:
+        type: string
+      value:
+        type: number
+    type: object
+  domain.DiscountType:
+    enum:
+    - percentage
+    - fixed
+    type: string
+    x-enum-comments:
+      DiscountTypeFixed: e.g., 5 = $5.00 off
+      DiscountTypePercentage: e.g., 20 = 20% off
+    x-enum-descriptions:
+    - e.g., 20 = 20% off
+    - e.g., 5 = $5.00 off
+    x-enum-varnames:
+    - DiscountTypePercentage
+    - DiscountTypeFixed
+  domain.InventoryMovement:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      note:
+        type: string
+      product_id:
+        type: integer
+      quantity:
+        description: positive = entry, negative = exit/adjustment
+        type: integer
+      type:
+        $ref: '#/definitions/domain.MovementType'
+    type: object
+  domain.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      customer_profile:
+        $ref: '#/definitions/domain.CustomerProfile'
+      email:
+        type: string
+      refresh_token:
+        type: string
+      role:
+        type: string
+      seller_profile:
+        $ref: '#/definitions/domain.SellerProfile'
+      user_id:
+        type: integer
+    type: object
+  domain.MovementType:
+    enum:
+    - entry
+    - exit
+    - adjustment
+    type: string
+    x-enum-comments:
+      MovementTypeAdjustment: manual correction
+      MovementTypeEntry: stock entering (purchase, return)
+      MovementTypeExit: stock leaving (sale, damage)
+    x-enum-descriptions:
+    - stock entering (purchase, return)
+    - stock leaving (sale, damage)
+    - manual correction
+    x-enum-varnames:
+    - MovementTypeEntry
+    - MovementTypeExit
+    - MovementTypeAdjustment
+  domain.Order:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/domain.OrderItem'
+        type: array
+      payment_history:
+        items:
+          $ref: '#/definitions/domain.Payment'
+        type: array
+      payment_method:
+        type: string
+      payment_reference:
+        type: string
+      payment_status:
+        $ref: '#/definitions/domain.PaymentStatus'
+      shipping_address:
+        type: string
+      shipping_carrier:
+        type: string
+      status:
+        $ref: '#/definitions/domain.OrderStatus'
+      total_amount:
+        type: number
+      tracking_number:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.OrderItem:
+    properties:
+      discount:
+        description: Discount at the time of purchase
+        type: number
+      id:
+        type: integer
+      order_id:
+        type: integer
+      price:
+        description: Price at the time of purchase
+        type: number
+      product:
+        $ref: '#/definitions/domain.Product'
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  domain.OrderStatus:
+    enum:
+    - pendiente
+    - pagado
+    - enviado
+    - entregado
+    - cancelado
+    - reembolsado
+    type: string
+    x-enum-varnames:
+    - OrderStatusPending
+    - OrderStatusPaid
+    - OrderStatusShipped
+    - OrderStatusDelivered
+    - OrderStatusCancelled
+    - OrderStatusRefunded
+  domain.Payment:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      external_status:
+        description: Raw status from provider
+        type: string
+      id:
+        type: integer
+      order_id:
+        type: integer
+      provider:
+        description: mercadopago, paypal, pse
+        type: string
+      provider_id:
+        description: ID from the payment gateway
+        type: string
+      status:
+        $ref: '#/definitions/domain.PaymentStatus'
+      updated_at:
+        type: string
+    type: object
+  domain.PaymentStatus:
+    enum:
+    - pendiente
+    - procesando
+    - completado
+    - fallido
+    - reembolsado
+    type: string
+    x-enum-varnames:
+    - PaymentStatusPending
+    - PaymentStatusProcessing
+    - PaymentStatusCompleted
+    - PaymentStatusFailed
+    - PaymentStatusRefunded
+  domain.Product:
+    properties:
+      category_id:
+        type: integer
+      cost_price:
+        type: number
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/domain.ProductImage'
+        type: array
+      min_stock:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      sku:
+        type: string
+      specs:
+        description: Stores JSON specifications
+        type: string
+      stock:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  domain.ProductImage:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_primary:
+        type: boolean
+      product_id:
+        type: integer
+      url:
+        type: string
+    type: object
+  domain.Review:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      product_id:
+        type: integer
+      rating:
+        description: Valor de 1 a 5
+        type: integer
+      updated_at:
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/domain.User'
+        description: Relación con el usuario que comenta
+      user_id:
+        type: integer
+    type: object
+  domain.SellerProfile:
+    properties:
+      company_name:
+        type: string
+      contact_name:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      nit:
+        description: Tax ID
+        type: string
+      phone:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.TokenPair:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      created_at:
+        type: string
+      customer_profile:
+        $ref: '#/definitions/domain.CustomerProfile'
+      email:
+        type: string
+      id:
+        type: integer
+      is_verified:
+        type: boolean
+      role:
+        description: admin, customer, seller
+        type: string
+      seller_profile:
+        $ref: '#/definitions/domain.SellerProfile'
+      two_factor_enabled:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  handlers.AddToCartRequest:
+    properties:
+      product_id:
+        type: integer
+      quantity:
+        minimum: 1
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
+  handlers.AdjustStockInput:
+    properties:
+      note:
+        type: string
+      quantity:
+        minimum: 1
+        type: integer
+      type:
+        $ref: '#/definitions/domain.MovementType'
+    required:
+    - quantity
+    - type
+    type: object
+  handlers.CreateAdminInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  handlers.CreateSellerInput:
+    properties:
+      company_name:
+        type: string
+      contact_name:
+        type: string
+      email:
+        type: string
+      nit:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - company_name
+    - contact_name
+    - email
+    - nit
+    - password
+    type: object
+  handlers.LoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.PlaceOrderRequest:
+    properties:
+      items:
+        items:
+          properties:
+            product_id:
+              type: integer
+            quantity:
+              minimum: 1
+              type: integer
+          required:
+          - product_id
+          - quantity
+          type: object
+        minItems: 1
+        type: array
+      shipping_address:
+        type: string
+    required:
+    - items
+    - shipping_address
+    type: object
+  handlers.RefreshInput:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  handlers.RegisterInput:
+    properties:
+      cedula:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - cedula
+    - email
+    - first_name
+    - last_name
+    - password
+    type: object
+host: 127.0.0.1:60203
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: Hexagonal Architecture REST API for a Virtual Store with RBAC, Image
+    Uploads, Pricing & Discounts.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Virtual Store API
+  version: "1.0"
+paths:
+  /audit:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.AuditLog'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get global audit logs
+      tags:
+      - Audit
+  /audit/products/{id}:
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.AuditLog'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get audit logs for a specific product
+      tags:
+      - Audit
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns Access/Refresh tokens plus user
+        details
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns login response with tokens and user details
+          schema:
+            $ref: '#/definitions/domain.LoginResponse'
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User Login
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Uses a refresh token to obtain a new pair of Access and Refresh
+        tokens
+      parameters:
+      - description: Refresh Token
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RefreshInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns new token pair
+          schema:
+            $ref: '#/definitions/domain.TokenPair'
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized or expired
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh Access Token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new customer account with their details
+      parameters:
+      - description: Customer Registration Data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Customer registered successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal error or already exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new customer
+      tags:
+      - Auth
+  /cart:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Empty the cart
+      tags:
+      - Cart
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user's cart
+      tags:
+      - Cart
+  /cart/items:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Item details
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AddToCartRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Cart'
+      security:
+      - BearerAuth: []
+      summary: Add or update item in cart
+      tags:
+      - Cart
+  /cart/items/{product_id}:
+    delete:
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Cart'
+      security:
+      - BearerAuth: []
+      summary: Remove an item from cart
+      tags:
+      - Cart
+  /categories:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Category'
+            type: array
+      summary: List all Categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: Creates a new product category (Admin only)
+      parameters:
+      - description: Category Data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Category'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Category'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a Category
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a Category
+      tags:
+      - Categories
+    get:
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Category'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a Category by ID
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated Category Data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Category'
+      security:
+      - BearerAuth: []
+      summary: Update a Category
+      tags:
+      - Categories
+  /discounts:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Discount'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List all Discounts
+      tags:
+      - Discounts
+    post:
+      consumes:
+      - application/json
+      description: Creates a new discount (percentage or fixed amount) for a product
+        or category (Admin only)
+      parameters:
+      - description: Discount data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Discount'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Discount'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a Discount
+      tags:
+      - Discounts
+  /discounts/{id}:
+    delete:
+      parameters:
+      - description: Discount ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a Discount
+      tags:
+      - Discounts
+    get:
+      parameters:
+      - description: Discount ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Discount'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a Discount by ID
+      tags:
+      - Discounts
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Discount ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated discount data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Discount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Discount'
+      security:
+      - BearerAuth: []
+      summary: Update a Discount
+      tags:
+      - Discounts
+  /discounts/code/{code}:
+    get:
+      description: Returns the discount details for a valid, active, non-expired coupon
+        code (public)
+      parameters:
+      - description: Coupon code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Discount'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Validate a coupon code
+      tags:
+      - Discounts
+  /inventory/movements:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.InventoryMovement'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List all inventory movements
+      tags:
+      - Inventory
+  /orders:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Order'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List all orders (Admin only)
+      tags:
+      - Orders
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Order details
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.PlaceOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Order'
+      security:
+      - BearerAuth: []
+      summary: Place a new order
+      tags:
+      - Orders
+  /orders/{id}/pay:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payment provider (mercadopago or paypal)
+        in: body
+        name: provider
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Redirect URL
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Initiate payment for an order
+      tags:
+      - Orders
+  /orders/{id}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Order'
+      security:
+      - BearerAuth: []
+      summary: Update order status (Admin only)
+      tags:
+      - Orders
+  /orders/{id}/tracking:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Order'
+      security:
+      - BearerAuth: []
+      summary: Update shipping info and set to shipped (Admin/Seller)
+      tags:
+      - Orders
+  /orders/my:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Order'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List current user's orders
+      tags:
+      - Orders
+  /products:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Product'
+            type: array
+      summary: List all Products
+      tags:
+      - Products
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Product name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Description
+        in: formData
+        name: description
+        type: string
+      - description: SKU (unique reference)
+        in: formData
+        name: sku
+        required: true
+        type: string
+      - description: Sale price
+        in: formData
+        name: price
+        required: true
+        type: number
+      - description: Cost price
+        in: formData
+        name: cost_price
+        type: number
+      - description: Initial stock
+        in: formData
+        name: stock
+        type: integer
+      - description: 'Low-stock alert threshold (default: 5)'
+        in: formData
+        name: min_stock
+        type: integer
+      - description: Category ID
+        in: formData
+        name: category_id
+        required: true
+        type: integer
+      - description: Product image
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Product'
+      security:
+      - BearerAuth: []
+      summary: Create a Product
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a Product
+      tags:
+      - Products
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Product'
+      summary: Get a Product by ID
+      tags:
+      - Products
+    put:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Product'
+      security:
+      - BearerAuth: []
+      summary: Update a Product
+      tags:
+      - Products
+  /products/{id}/movements:
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.InventoryMovement'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List inventory movements for a product
+      tags:
+      - Inventory
+  /products/{id}/price:
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get product final price with applied discount
+      tags:
+      - Products
+  /products/{id}/reviews:
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Review'
+            type: array
+      summary: List reviews for a product
+      tags:
+      - Reviews
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Rating (1-5)
+        in: formData
+        name: rating
+        required: true
+        type: integer
+      - description: Review comment
+        in: formData
+        name: comment
+        required: true
+        type: string
+      - description: Review image
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Review'
+      security:
+      - BearerAuth: []
+      summary: Add a review to a product
+      tags:
+      - Reviews
+  /products/{id}/stock:
+    post:
+      consumes:
+      - application/json
+      description: Register a stock entry, exit or manual adjustment (Admin/Seller)
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Movement data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AdjustStockInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.InventoryMovement'
+      security:
+      - BearerAuth: []
+      summary: Adjust product stock
+      tags:
+      - Inventory
+  /products/low-stock:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Product'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List products with low stock
+      tags:
+      - Inventory
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Gets a list of all users and their profile data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.User'
+            type: array
+        "500":
+          description: Failed to fetch users
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all users
+      tags:
+      - Users
+  /users/admin:
+    post:
+      consumes:
+      - application/json
+      description: Allows an existing Admin to create a new Admin account
+      parameters:
+      - description: Admin Registration Data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateAdminInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Admin created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new Admin
+      tags:
+      - Users
+  /users/seller:
+    post:
+      consumes:
+      - application/json
+      description: Allows an Admin to create a new Seller with NIT and Company Name
+      parameters:
+      - description: Seller Registration Data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateSellerInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Seller created successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new Seller
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
