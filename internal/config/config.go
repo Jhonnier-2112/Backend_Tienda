@@ -31,7 +31,7 @@ func LoadConfig() *Config {
 		DBPassword:           getEnv("DB_PASSWORD", "Colombia1."),
 		DBName:               getEnv("DB_NAME", "virtual_store"),
 		JWTSecret:            getEnv("JWT_SECRET", "super_secret_key"),
-		ServerAddress:        getEnv("VIRTUAL_STORE_SERVER_ADDRESS", ":10000"),
+		ServerAddress:        getEnv("VIRTUAL_STORE_SERVER_ADDRESS", "https://backend-tienda-wrgv.onrender.com:10000"),
 		MercadoPagoAccessTok: getEnv("MERCADOPAGO_ACCESS_TOKEN", ""),
 		PayPalClientID:       getEnv("PAYPAL_CLIENT_ID", ""),
 		PayPalSecret:         getEnv("PAYPAL_SECRET", ""),
