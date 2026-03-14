@@ -942,6 +942,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/orders/{id}/receipt/pdf": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/pdf"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Download PDF Receipt for an Order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
         "/orders/{id}/status": {
             "put": {
                 "security": [
@@ -1838,6 +1871,9 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "mfa_token": {
+                    "type": "string"
+                },
                 "refresh_token": {
                     "type": "string"
                 },
@@ -2357,8 +2393,7 @@ const docTemplate = `{
                 "cedula",
                 "email",
                 "first_name",
-                "last_name",
-                "password"
+                "last_name"
             ],
             "properties": {
                 "cedula": {
@@ -2372,10 +2407,6 @@ const docTemplate = `{
                 },
                 "last_name": {
                     "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
                 }
             }
         }
@@ -2392,7 +2423,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "127.0.0.1:60203",
+	Host:             "https://backend-tienda-wrgv.onrender.com",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Virtual Store API",

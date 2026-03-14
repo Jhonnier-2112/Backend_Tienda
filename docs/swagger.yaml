@@ -156,6 +156,8 @@ definitions:
         $ref: '#/definitions/domain.CustomerProfile'
       email:
         type: string
+      mfa_token:
+        type: string
       refresh_token:
         type: string
       role:
@@ -518,17 +520,13 @@ definitions:
         type: string
       last_name:
         type: string
-      password:
-        minLength: 6
-        type: string
     required:
     - cedula
     - email
     - first_name
     - last_name
-    - password
     type: object
-host: 127.0.0.1:60203
+host: https://backend-tienda-wrgv.onrender.com
 info:
   contact:
     email: support@example.com
@@ -1102,6 +1100,26 @@ paths:
       security:
       - BearerAuth: []
       summary: Initiate payment for an order
+      tags:
+      - Orders
+  /orders/{id}/receipt/pdf:
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: Download PDF Receipt for an Order
       tags:
       - Orders
   /orders/{id}/status:
