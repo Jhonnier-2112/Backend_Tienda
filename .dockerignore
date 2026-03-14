@@ -1,6 +1,6 @@
 # Variables de entorno - no incluir en la imagen
-.env
-.env.*
+# .env
+# .env.*
 
 # Git
 .git
