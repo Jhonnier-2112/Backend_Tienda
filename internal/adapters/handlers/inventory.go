@@ -163,11 +163,19 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	name := c.PostForm("name")
 	description := c.PostForm("description")
 	sku := c.PostForm("sku")
-	price, _ := strconv.ParseFloat(c.PostForm("price"), 64)
+	price, err := strconv.ParseFloat(c.PostForm("price"), 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid price format"})
+		return
+	}
 	costPrice, _ := strconv.ParseFloat(c.PostForm("cost_price"), 64)
 	stock, _ := strconv.Atoi(c.PostForm("stock"))
 	minStock, _ := strconv.Atoi(c.PostForm("min_stock"))
-	categoryID, _ := strconv.Atoi(c.PostForm("category_id"))
+	categoryID, err := strconv.Atoi(c.PostForm("category_id"))
+	if err != nil || categoryID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or missing category_id"})
+		return
+	}
 
 	if minStock == 0 {
 		minStock = 5
@@ -246,11 +254,19 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	name := c.PostForm("name")
 	description := c.PostForm("description")
 	sku := c.PostForm("sku")
-	price, _ := strconv.ParseFloat(c.PostForm("price"), 64)
+	price, err := strconv.ParseFloat(c.PostForm("price"), 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid price format"})
+		return
+	}
 	costPrice, _ := strconv.ParseFloat(c.PostForm("cost_price"), 64)
 	stock, _ := strconv.Atoi(c.PostForm("stock"))
 	minStock, _ := strconv.Atoi(c.PostForm("min_stock"))
-	categoryID, _ := strconv.Atoi(c.PostForm("category_id"))
+	categoryID, err := strconv.Atoi(c.PostForm("category_id"))
+	if err != nil || categoryID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or missing category_id"})
+		return
+	}
 	file, _ := c.FormFile("image")
 
 	userID, _ := c.Get("userID")
