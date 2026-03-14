@@ -9,6 +9,9 @@ func CORSMiddleware() gin.HandlerFunc {
 		allowedOrigins := []string{
 			"https://tu-frontend.vercel.app",           // tu frontend
 			"https://backend-tienda-wrgv.onrender.com", // opcional, si tu backend llama a sí mismo
+			"https://127.0.0.1:60203",
+			"http://localhost:3000",
+			"https://reputably-unrepugnant-giuliana.ngrok-free.dev ",
 		}
 
 		origin := c.Request.Header.Get("Origin")
