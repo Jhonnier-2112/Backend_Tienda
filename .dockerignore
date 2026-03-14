@@ -16,7 +16,7 @@ test_*.jpg
 test_*.png
 
 # Uploads de desarrollo local (se usa un volumen Docker en producción)
-uploads/
+
 
 # Binarios compilados localmente
 server

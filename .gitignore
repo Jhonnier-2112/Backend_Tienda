@@ -30,4 +30,3 @@ docker-compose.*.yml
 /docs/
 
 # Uploads (if you don't want to track uploaded files)
-/uploads/
