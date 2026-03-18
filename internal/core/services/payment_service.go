@@ -44,11 +44,11 @@ func (s *paymentService) CreateMercadoPagoPreference(order *domain.Order) (strin
 			},
 		},
 		"external_reference": fmt.Sprintf("%d", order.ID),
-		"notification_url":   "https://reputably-unrepugnant-giuliana.ngrok-free.dev/api/payments/webhook/mercadopago",
+		"notification_url":   s.cfg.AppURL + "/api/payments/webhook/mercadopago",
 		"back_urls": map[string]string{
-			"success": "https://reputably-unrepugnant-giuliana.ngrok-free.dev/payment/success",
-			"pending": "https://reputably-unrepugnant-giuliana.ngrok-free.dev/payment/pending",
-			"failure": "https://reputably-unrepugnant-giuliana.ngrok-free.dev/checkout",
+			"success": s.cfg.AppURL + "/payment/success",
+			"pending": s.cfg.AppURL + "/payment/pending",
+			"failure": s.cfg.AppURL + "/checkout",
 		},
 		"auto_return": "approved",
 	}

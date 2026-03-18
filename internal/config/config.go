@@ -16,6 +16,7 @@ type Config struct {
 	MercadoPagoAccessTok string
 	PayPalClientID       string
 	PayPalSecret         string
+	AppURL               string
 }
 
 func LoadConfig() *Config {
@@ -35,6 +36,7 @@ func LoadConfig() *Config {
 		MercadoPagoAccessTok: getEnv("MERCADOPAGO_ACCESS_TOKEN", ""),
 		PayPalClientID:       getEnv("PAYPAL_CLIENT_ID", ""),
 		PayPalSecret:         getEnv("PAYPAL_SECRET", ""),
+		AppURL:               getEnv("APP_URL", ""),
 	}
 }
 
