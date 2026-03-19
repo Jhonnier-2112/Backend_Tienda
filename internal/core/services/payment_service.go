@@ -232,6 +232,17 @@ func (s *paymentService) CreatePayPalOrder(order *domain.Order) (string, error) 
 }
 
 func (s *paymentService) ProcessMercadoPagoWebhook(payload map[string]interface{}) error {
+	// Manejo de petición de prueba del simulador de MercadoPago webhooks
+	if idVal, ok := payload["id"]; ok {
+		// En el simulador envían id = "123456" o 123456
+		if idStr, isStr := idVal.(string); isStr && idStr == "123456" {
+			return nil
+		}
+		if idFloat, isFloat := idVal.(float64); isFloat && idFloat == 123456 {
+			return nil
+		}
+	}
+
 	topic, _ := payload["topic"].(string)
 	if topic == "" {
 		topic, _ = payload["type"].(string) // Sometimes passed as type
