@@ -50,3 +50,30 @@ func (r *dashboardPostgresRepository) GetLowStockProducts() ([]domain.Product, e
 	err := r.db.Where("stock <= min_stock").Find(&products).Error
 	return products, err
 }
+
+func (r *dashboardPostgresRepository) GetActiveUsers() (int64, error) {
+	var count int64
+	err := r.db.Model(&domain.User{}).Where("role = ?", "client").Count(&count).Error
+	return count, err
+}
+
+func (r *dashboardPostgresRepository) GetTopSellingProducts(limit int) ([]domain.ProductSales, error) {
+	var sales []domain.ProductSales
+	err := r.db.Table("order_items").
+		Select("products.name as product_name, products.image_url as product_image, SUM(order_items.quantity) as total_sold, SUM(order_items.quantity * order_items.price) as total_revenue").
+		Joins("JOIN products ON products.id = order_items.product_id").
+		Joins("JOIN orders ON orders.id = order_items.order_id").
+		Where("orders.payment_status = ?", domain.PaymentStatusCompleted).
+		Group("products.id, products.name, products.image_url").
+		Order("total_sold desc").
+		Limit(limit).
+		Scan(&sales).Error
+	return sales, err
+}
+
+func (r *dashboardPostgresRepository) GetAllOrdersForExport() ([]domain.Order, error) {
+	var orders []domain.Order
+	// Preload everything useful for the spreadsheet
+	err := r.db.Preload("User").Preload("Items.Product").Order("created_at desc").Find(&orders).Error
+	return orders, err
+}

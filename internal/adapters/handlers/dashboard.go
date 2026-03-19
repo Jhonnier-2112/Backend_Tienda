@@ -33,3 +33,22 @@ func (h *DashboardHandler) GetStats(c *gin.Context) {
 
 	c.JSON(http.StatusOK, stats)
 }
+
+// ExportToExcel returns a CSV file with all sales history
+// @Summary Export sales to Excel (CSV)
+// @Description Download sales history
+// @Tags admin
+// @Produce text/csv
+// @Security BearerAuth
+// @Success 200 {string} string
+// @Router /admin/dashboard/export [get]
+func (h *DashboardHandler) ExportToExcel(c *gin.Context) {
+	data, err := h.service.ExportSalesCSV()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate export file"})
+		return
+	}
+
+	c.Header("Content-Disposition", "attachment; filename=ventas_tienda.csv")
+	c.Data(http.StatusOK, "text/csv; charset=utf-8", data)
+}

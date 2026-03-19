@@ -87,6 +87,7 @@ func SetupRouter(
 			dashboardAdmin.Use(middleware.RoleMiddleware("admin"))
 			{
 				dashboardAdmin.GET("/stats", dashboardHandler.GetStats)
+				dashboardAdmin.GET("/export", dashboardHandler.ExportToExcel)
 			}
 
 			// Products (Admin + Seller can create/update; Admin only delete)

@@ -8,8 +8,12 @@ type DashboardRepository interface {
 	GetTotalRevenue() (float64, error)
 	GetRecentOrders(limit int) ([]domain.Order, error)
 	GetLowStockProducts() ([]domain.Product, error)
+	GetActiveUsers() (int64, error)
+	GetTopSellingProducts(limit int) ([]domain.ProductSales, error)
+	GetAllOrdersForExport() ([]domain.Order, error)
 }
 
 type DashboardService interface {
 	GetStats() (*domain.DashboardStats, error)
+	ExportSalesCSV() ([]byte, error)
 }
