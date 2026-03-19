@@ -25,6 +25,7 @@ func SetupRouter(
 	auditHandler *handlers.AuditHandler,
 	assistantHandler *handlers.AssistantHandler,
 	paymentHandler *handlers.PaymentHandler,
+	dashboardHandler *handlers.DashboardHandler,
 ) *gin.Engine {
 
 	r := gin.Default()
@@ -79,6 +80,13 @@ func SetupRouter(
 				categoriesAdmin.POST("", categoryHandler.CreateCategory)
 				categoriesAdmin.PUT("/:id", categoryHandler.UpdateCategory)
 				categoriesAdmin.DELETE("/:id", categoryHandler.DeleteCategory)
+			}
+
+			// Dashboard (Admin only)
+			dashboardAdmin := protected.Group("/dashboard")
+			dashboardAdmin.Use(middleware.RoleMiddleware("admin"))
+			{
+				dashboardAdmin.GET("/stats", dashboardHandler.GetStats)
 			}
 
 			// Products (Admin + Seller can create/update; Admin only delete)

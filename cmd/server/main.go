@@ -52,6 +52,7 @@ func main() {
 	refreshTokenRepo := repository.NewRefreshTokenPostgresRepository(db)
 	paymentRepo := repository.NewPaymentPostgresRepository(db)
 	emailLogRepo := repository.NewEmailLogRepository(db)
+	dashboardRepo := repository.NewDashboardPostgresRepository(db)
 
 	// 4. Instantiate Services (Core Logic)
 	imageStorage := storage.NewLocalStorage("uploads", "/uploads")
@@ -66,6 +67,7 @@ func main() {
 	cartService := services.NewCartService(cartRepo, inventoryService)
 	userService := services.NewUserService(userRepo)
 	assistantService := services.NewAssistantService()
+	dashboardService := services.NewDashboardService(dashboardRepo)
 
 	// 5. Instantiate Handlers (Driving Adapters)
 	authHandler := handlers.NewAuthHandler(authService)
@@ -79,6 +81,7 @@ func main() {
 	auditHandler := handlers.NewAuditHandler(auditService)
 	assistantHandler := handlers.NewAssistantHandler(assistantService)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
+	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 
 	// 6. Setup Router
 	r := routes.SetupRouter(
@@ -94,6 +97,7 @@ func main() {
 		auditHandler,
 		assistantHandler,
 		paymentHandler,
+		dashboardHandler,
 	)
 
 	// Serve Static Files
