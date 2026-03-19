@@ -39,10 +39,10 @@ type InventoryService interface {
 	DeleteCategory(id uint) error
 
 	// Product Operations
-	CreateProduct(userID uint, name, description, sku string, price, costPrice float64, stock, minStock int, categoryID uint, imageFile *multipart.FileHeader) (*domain.Product, error)
-	GetProducts() ([]domain.Product, error)
+	CreateProduct(userID uint, name, description, sku string, price, costPrice float64, stock, minStock int, categoryID uint, brand, shippingOrigin string, shippingCost float64, hasPromotion, isFreeShipping bool, imageFile *multipart.FileHeader) (*domain.Product, error)
+	GetProducts(filter *domain.ProductFilter) ([]domain.Product, error)
 	GetProductByID(id uint) (*domain.Product, error)
-	UpdateProduct(userID, id uint, name, description, sku string, price, costPrice float64, stock, minStock int, categoryID uint, imageFile *multipart.FileHeader) (*domain.Product, error)
+	UpdateProduct(userID, id uint, name, description, sku string, price, costPrice float64, stock, minStock int, categoryID uint, brand, shippingOrigin string, shippingCost float64, hasPromotion, isFreeShipping bool, imageFile *multipart.FileHeader) (*domain.Product, error)
 	DeleteProduct(id uint) error
 
 	// Stock Management

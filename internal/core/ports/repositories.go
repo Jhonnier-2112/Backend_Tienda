@@ -24,7 +24,7 @@ type InventoryRepository interface {
 
 	// Product Operations
 	CreateProduct(product *domain.Product) error
-	GetProducts() ([]domain.Product, error)
+	GetProducts(filter *domain.ProductFilter) ([]domain.Product, error)
 	GetProductByID(id uint) (*domain.Product, error)
 	UpdateProduct(product *domain.Product) error
 	DeleteProduct(id uint) error

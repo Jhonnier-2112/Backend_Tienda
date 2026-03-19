@@ -48,9 +48,32 @@ func (r *InventoryPostgresRepository) CreateProduct(product *domain.Product) err
 	return r.db.Create(product).Error
 }
 
-func (r *InventoryPostgresRepository) GetProducts() ([]domain.Product, error) {
+func (r *InventoryPostgresRepository) GetProducts(filter *domain.ProductFilter) ([]domain.Product, error) {
 	var products []domain.Product
-	if err := r.db.Preload("Category").Find(&products).Error; err != nil {
+	query := r.db.Preload("Category")
+
+	if filter != nil {
+		if filter.Search != "" {
+			query = query.Where("name ILIKE ? OR sku ILIKE ?", "%"+filter.Search+"%", "%"+filter.Search+"%")
+		}
+		if filter.CategoryID != nil {
+			query = query.Where("category_id = ?", *filter.CategoryID)
+		}
+		if filter.Brand != "" {
+			query = query.Where("brand ILIKE ?", filter.Brand)
+		}
+		if filter.HasPromotion != nil {
+			query = query.Where("has_promotion = ?", *filter.HasPromotion)
+		}
+		if filter.IsFreeShipping != nil {
+			query = query.Where("is_free_shipping = ?", *filter.IsFreeShipping)
+		}
+		if filter.ShippingOrigin != "" {
+			query = query.Where("shipping_origin = ?", filter.ShippingOrigin)
+		}
+	}
+
+	if err := query.Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil

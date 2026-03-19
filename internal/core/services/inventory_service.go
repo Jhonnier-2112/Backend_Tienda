@@ -73,6 +73,9 @@ func (s *inventoryService) CreateProduct(
 	price, costPrice float64,
 	stock, minStock int,
 	categoryID uint,
+	brand, shippingOrigin string,
+	shippingCost float64,
+	hasPromotion, isFreeShipping bool,
 	imageFile *multipart.FileHeader,
 ) (*domain.Product, error) {
 	fmt.Printf("Received CreateProduct request: name=%s, categoryID=%d\n", name, categoryID) // Debug log
@@ -88,15 +91,20 @@ func (s *inventoryService) CreateProduct(
 	}
 
 	product := &domain.Product{
-		SKU:         sku,
-		Name:        name,
-		Description: description,
-		Price:       price,
-		CostPrice:   costPrice,
-		Stock:       stock,
-		MinStock:    minStock,
-		CategoryID:  categoryID,
-		ImageURL:    imageURL,
+		SKU:            sku,
+		Name:           name,
+		Description:    description,
+		Price:          price,
+		CostPrice:      costPrice,
+		Stock:          stock,
+		MinStock:       minStock,
+		CategoryID:     categoryID,
+		ImageURL:       imageURL,
+		Brand:          brand,
+		ShippingOrigin: shippingOrigin,
+		ShippingCost:   shippingCost,
+		HasPromotion:   hasPromotion,
+		IsFreeShipping: isFreeShipping,
 	}
 
 	if err := s.repo.CreateProduct(product); err != nil {
@@ -109,8 +117,8 @@ func (s *inventoryService) CreateProduct(
 	return product, nil
 }
 
-func (s *inventoryService) GetProducts() ([]domain.Product, error) {
-	return s.repo.GetProducts()
+func (s *inventoryService) GetProducts(filter *domain.ProductFilter) ([]domain.Product, error) {
+	return s.repo.GetProducts(filter)
 }
 
 func (s *inventoryService) GetProductByID(id uint) (*domain.Product, error) {
@@ -123,6 +131,9 @@ func (s *inventoryService) UpdateProduct(
 	price, costPrice float64,
 	stock, minStock int,
 	categoryID uint,
+	brand, shippingOrigin string,
+	shippingCost float64,
+	hasPromotion, isFreeShipping bool,
 	imageFile *multipart.FileHeader,
 ) (*domain.Product, error) {
 	product, err := s.repo.GetProductByID(id)
@@ -150,6 +161,11 @@ func (s *inventoryService) UpdateProduct(
 	product.Stock = stock
 	product.MinStock = minStock
 	product.CategoryID = categoryID
+	product.Brand = brand
+	product.ShippingOrigin = shippingOrigin
+	product.ShippingCost = shippingCost
+	product.HasPromotion = hasPromotion
+	product.IsFreeShipping = isFreeShipping
 
 	if err := s.repo.UpdateProduct(product); err != nil {
 		return nil, err

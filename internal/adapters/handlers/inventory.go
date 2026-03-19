@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -177,6 +176,15 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 
+	brand := c.PostForm("brand")
+	shippingOrigin := c.PostForm("shipping_origin")
+	if shippingOrigin == "" {
+		shippingOrigin = "local"
+	}
+	shippingCost, _ := strconv.ParseFloat(c.PostForm("shipping_cost"), 64)
+	hasPromotion, _ := strconv.ParseBool(c.PostForm("has_promotion"))
+	isFreeShipping, _ := strconv.ParseBool(c.PostForm("is_free_shipping"))
+
 	if minStock == 0 {
 		minStock = 5
 	}
@@ -185,13 +193,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 
 	userID, _ := c.Get("userID")
 
-	fmt.Printf("Creating product with category ID: %d\n", categoryID) // Debug log
-	fmt.Printf("Received price: %v\n", price)                         // Debug log
-	fmt.Printf("Received cost price: %v\n", costPrice)                // Debug log
-	fmt.Printf("Received stock: %d\n", stock)                         // Debug log
-	fmt.Printf("Received min stock: %d\n", minStock)                  // Debug log
-
-	product, err := h.service.CreateProduct(userID.(uint), name, description, sku, price, costPrice, stock, minStock, uint(categoryID), file)
+	product, err := h.service.CreateProduct(userID.(uint), name, description, sku, price, costPrice, stock, minStock, uint(categoryID), brand, shippingOrigin, shippingCost, hasPromotion, isFreeShipping, file)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -206,7 +208,32 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 // @Success 200 {array} domain.Product
 // @Router /products [get]
 func (h *ProductHandler) GetProducts(c *gin.Context) {
-	products, err := h.service.GetProducts()
+	filter := &domain.ProductFilter{
+		Search: c.Query("search"),
+	}
+
+	if catID := c.Query("category_id"); catID != "" {
+		if id, err := strconv.Atoi(catID); err == nil {
+			uid := uint(id)
+			filter.CategoryID = &uid
+		}
+	}
+	if brand := c.Query("brand"); brand != "" {
+		filter.Brand = brand
+	}
+	if hasPromo := c.Query("has_promotion"); hasPromo != "" {
+		parsed, _ := strconv.ParseBool(hasPromo)
+		filter.HasPromotion = &parsed
+	}
+	if freeShip := c.Query("is_free_shipping"); freeShip != "" {
+		parsed, _ := strconv.ParseBool(freeShip)
+		filter.IsFreeShipping = &parsed
+	}
+	if origin := c.Query("shipping_origin"); origin != "" {
+		filter.ShippingOrigin = origin
+	}
+
+	products, err := h.service.GetProducts(filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch products"})
 		return
@@ -267,11 +294,21 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or missing category_id"})
 		return
 	}
+
+	brand := c.PostForm("brand")
+	shippingOrigin := c.PostForm("shipping_origin")
+	if shippingOrigin == "" {
+		shippingOrigin = "local"
+	}
+	shippingCost, _ := strconv.ParseFloat(c.PostForm("shipping_cost"), 64)
+	hasPromotion, _ := strconv.ParseBool(c.PostForm("has_promotion"))
+	isFreeShipping, _ := strconv.ParseBool(c.PostForm("is_free_shipping"))
+
 	file, _ := c.FormFile("image")
 
 	userID, _ := c.Get("userID")
 
-	product, err := h.service.UpdateProduct(userID.(uint), uint(id), name, description, sku, price, costPrice, stock, minStock, uint(categoryID), file)
+	product, err := h.service.UpdateProduct(userID.(uint), uint(id), name, description, sku, price, costPrice, stock, minStock, uint(categoryID), brand, shippingOrigin, shippingCost, hasPromotion, isFreeShipping, file)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
