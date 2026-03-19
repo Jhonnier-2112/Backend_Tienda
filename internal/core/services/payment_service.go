@@ -44,7 +44,7 @@ func (s *paymentService) CreateMercadoPagoPreference(order *domain.Order) (strin
 			},
 		},
 		"external_reference": fmt.Sprintf("%d", order.ID),
-		"notification_url":   s.cfg.AppURL + "/api/payments/webhook/mercadopago",
+		"notification_url":   "https://backend-tienda-wrgv.onrender.com/api/payments/webhook/mercadopago",
 		"back_urls": map[string]string{
 			"success": s.cfg.AppURL + "/payment/success",
 			"pending": s.cfg.AppURL + "/payment/pending",
@@ -233,19 +233,23 @@ func (s *paymentService) CreatePayPalOrder(order *domain.Order) (string, error) 
 
 func (s *paymentService) ProcessMercadoPagoWebhook(payload map[string]interface{}) error {
 	topic, _ := payload["topic"].(string)
-	resourceURL, _ := payload["resource"].(string)
+	if topic == "" {
+		topic, _ = payload["type"].(string) // Sometimes passed as type
+	}
+	action, _ := payload["action"].(string)
 
-	switch topic {
-	case "payment":
-		// Webhook tradicional de pago individual
+	// If it's a payment action from Webhook or manual frontend call
+	if topic == "payment" || action == "payment.updated" || action == "payment.created" {
 		dataMap, ok := payload["data"].(map[string]interface{})
 		if !ok {
 			return errors.New("invalid payload structure: data missing")
 		}
 		return s.processPaymentData(dataMap)
+	}
 
-	case "merchant_order":
+	if topic == "merchant_order" {
 		// Webhook de merchant_order: hay que consultar la API para obtener los pagos
+		resourceURL, _ := payload["resource"].(string)
 		if resourceURL == "" {
 			return errors.New("merchant_order webhook missing resource URL")
 		}
@@ -288,10 +292,9 @@ func (s *paymentService) ProcessMercadoPagoWebhook(payload map[string]interface{
 			}
 		}
 		return nil
-
-	default:
-		return fmt.Errorf("unsupported webhook topic: %s", topic)
 	}
+
+	return fmt.Errorf("unsupported webhook topic/action: %s / %s", topic, action)
 }
 
 func (s *paymentService) processPaymentData(dataMap map[string]interface{}) error {
@@ -304,38 +307,52 @@ func (s *paymentService) processPaymentData(dataMap map[string]interface{}) erro
 
 	extRefStr, _ := dataMap["external_reference"].(string)
 	mpStatus, _ := dataMap["status"].(string)
+
+	// If missing external_reference or status, fetch from MercadoPago
+	if extRefStr == "" || mpStatus == "" {
+		paymentInfo, err := s.getMercadoPagoPayment(mpPaymentID)
+		if err == nil && paymentInfo != nil {
+			if extRefStr == "" {
+				if ext, ok := paymentInfo["external_reference"].(string); ok {
+					extRefStr = ext
+				}
+			}
+			if mpStatus == "" {
+				if stat, ok := paymentInfo["status"].(string); ok {
+					mpStatus = stat
+				}
+			}
+		}
+	}
+
 	if mpStatus == "" {
 		mpStatus = "approved"
 	}
 
-	var payment domain.Payment
-	if extRefStr != "" {
-		orderID, err := strconv.Atoi(extRefStr)
-		if err != nil {
-			return fmt.Errorf("invalid external_reference: %s", extRefStr)
-		}
-		payments, err := s.paymentRepo.GetByOrderID(uint(orderID))
-		if err != nil || len(payments) == 0 {
-			return fmt.Errorf("no payments found for order %d", orderID)
-		}
+	if extRefStr == "" {
+		return fmt.Errorf("missing external_reference for payment %s even after lookup", mpPaymentID)
+	}
 
-		for _, p := range payments {
-			if p.Provider == "mercadopago" {
-				payment = p
-				if p.Status == domain.PaymentStatusPending {
-					break
-				}
+	var payment domain.Payment
+	orderID, err := strconv.Atoi(extRefStr)
+	if err != nil {
+		return fmt.Errorf("invalid external_reference: %s", extRefStr)
+	}
+	payments, err := s.paymentRepo.GetByOrderID(uint(orderID))
+	if err != nil || len(payments) == 0 {
+		return fmt.Errorf("no payments found for order %d", orderID)
+	}
+
+	for _, p := range payments {
+		if p.Provider == "mercadopago" {
+			payment = p
+			if p.Status == domain.PaymentStatusPending {
+				break
 			}
 		}
-		if payment.ID == 0 {
-			return errors.New("mercadopago payment not found for order")
-		}
-	} else {
-		p, err := s.paymentRepo.GetByProviderID("mercadopago", mpPaymentID)
-		if err != nil {
-			return fmt.Errorf("payment not found for provider_id: %s", mpPaymentID)
-		}
-		payment = *p
+	}
+	if payment.ID == 0 {
+		return errors.New("mercadopago payment not found for order")
 	}
 
 	payment.ExternalStatus = mpStatus
