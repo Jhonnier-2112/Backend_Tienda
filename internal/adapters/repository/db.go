@@ -32,6 +32,7 @@ func ConnectDatabase(cfg *config.Config) (*gorm.DB, error) {
 		&domain.CustomerProfile{},
 		&domain.SellerProfile{},
 		&domain.Category{},
+		&domain.ProductImage{},
 		&domain.Product{},
 		&domain.Discount{},
 		&domain.InventoryMovement{},
